@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+{% load static %}
 
 {% block title %}Shop ― LvivBadStore{% endblock %}
 
@@ -63,11 +64,15 @@
                         <!--Grid column-->
                         <div class="col-lg-3 col-md-6 mb-4">
                             <!--Card-->
-                            <div class="card">
+                            <div class="card h-100">
 
                                 <!--Card image-->
                                 <div class="view overlay">
-                                    <img src='/static/pictures/racket_item.png' class="card-img-top" alt="">
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}" class="card-img-top h-100" alt="{{ item.title }}">
+                                    {% else %}
+                                        <img src="{% static '../static/pictures/defoult.jpg' %}" class="card-img-top h-100" alt="{{ item.title }}">
+                                    {% endif %}
                                     <a>
                                         <div class="mask rgba-white-slight"></div>
                                     </a>
@@ -84,7 +89,7 @@
                                         <strong>
                                             <a href="" class="dark-grey-text">
                                                 {{ item.title }}
-                                                <span class="badge badge-pill danger-color">NEW</span>
+                                                
                                             </a>
                                         </strong>
                                     </h5>
