@@ -32,3 +32,4 @@ urlpatterns = [
     path('social-auth/', include('social_django.urls', namespace='social')),
     path('shop/', items_view, name='shop'),
 ]
+
