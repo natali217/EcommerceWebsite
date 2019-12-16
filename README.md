@@ -1,6 +1,4 @@
 # LvivBadStore
 
 ## About
-ECommerce website using Django.
-
-    ```
+Ecommerce website using Django.
