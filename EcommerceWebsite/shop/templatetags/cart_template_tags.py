@@ -15,7 +15,3 @@ def cart_item_count(user):
             else:
                 return amount
     return 0
-
-@register.filter
-def get_subtotal(order_item):
-    return order_item.item.discount_price * order_item.amount

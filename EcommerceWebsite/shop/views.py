@@ -3,11 +3,10 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Sum, DecimalField, ExpressionWrapper
-from django.db.models.functions import Cast
 
 # Create your views here.
 from shop.models import Item, OrderItem, Order, Review
+from shop.forms import CheckoutForm, ReviewForm
 
 
 class ShopView(ListView):
@@ -46,6 +45,7 @@ class ProductView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['reviews'] = Review.objects.filter(item=self.object)
+        context['form'] = ReviewForm()
         return context
 
 @login_required
@@ -69,6 +69,43 @@ def add_to_cart_view(request, slug):
     order_item.save()
     messages.info(request, 'This item was added to your cart.')
     return redirect('product', slug=slug)
+
+
+
+def product_view(request, slug):
+    context = {}
+
+    item = Item.objects.filter(slug=slug).first()
+    if request.POST:
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+
+            user = request.user
+            item = Item.objects.filter(slug=slug).first()
+            message = form.cleaned_data.get('message')
+            
+
+            Review.objects.create(
+                message=message,
+                
+                user=user,
+                item=item
+            )
+
+            return redirect('product', slug=slug)
+        else:
+            context['form'] = form
+    else:
+        if request.user.is_authenticated:
+            bought_by_user = OrderItem.objects.filter(item=item, order__user=request.user, order__is_paid=True).exists()
+            if bought_by_user:
+                context['bought_by_user'] = True
+                context['form'] = ReviewForm()
+
+    context['item'] = item
+    context['reviews'] = Review.objects.filter(item=item)
+
+    return render(request, 'product.html', context)
 
 
 @login_required
@@ -104,3 +141,25 @@ def cart_view(request):
     context['total'] = total
     
     return render(request, 'cart.html', context)
+
+
+@login_required
+def checkout_view(request):
+    # if POST request - process data
+    if request.POST:
+        form = CheckoutForm(request.POST)
+        if form.is_valid():
+            # TODO: payment processing
+            order = request.user.order_set.filter(is_paid=False).first()
+            order.is_paid = True
+            order.save()
+            return redirect('thanks')
+    # else if GET or any other request create a blank form
+    else:
+        form = CheckoutForm()
+
+    return render(request, 'checkout.html', {'form' : form})
+
+
+def thanks_view(request):
+    return render(request, 'thanks.html', {})

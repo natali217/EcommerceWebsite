@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.shortcuts import reverse
 from shop.utils import get_item_image_upload_location
-
+from django.db.models import Avg
 
 class Item(models.Model):
     CATEGORY_CHOICES = (
@@ -66,6 +66,10 @@ class Review(models.Model):
     post_date = models.DateTimeField(auto_now_add=True)
     message = models.TextField()
     
+    def save(self, *args, **kwargs):
+        
+        self.item.save()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.user} - {self.item}'
